@@ -27,6 +27,7 @@ def makeTask2Sets(N, dest):
     while(count<int(N)):
         dgrm = diagram.createDiagram()
         danger = np.array(dgrm.layWires())
+        print(f"my danger: {danger}")
         if danger[1] != 0:
             matrices.append(dgrm.data.flatten())
             labels.append(danger)
