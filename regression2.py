@@ -94,16 +94,6 @@ if __name__ == '__main__':
     print(f'Initial Testing loss: {regression.LCE(f=regression(), y=regression.labels)}, Initial Testing accuracy: {regression.accuracy()}')
     regression.w = ww
     print(f'Final Testing loss: {regression.LCE(f=regression(), y=regression.labels)}, Final Testing accuracy: {regression.accuracy()}')
-
-
-
-
-
-
-
-    
-
-
-
-
+    # test_regr = GD_Model(test_data, regression.w, test_labels)
+    # print(f'Testing loss: {test_regr.LCE(f=test_regr(), y=test_regr.labels)}, Current accuracy: {test_regr.accuracy()}')
     
