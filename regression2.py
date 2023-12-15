@@ -3,7 +3,6 @@ from regression import add_neighborhood_feature, add_polynomial_features
 
 # We can think of data as m x n matrix. m -> number of data points/samples, n -> number of features per datapoint
 # We can multiply m x n matrix with weights vector n x 1, then apply sigmoid to all of these to get m results
-
 def sigmoid(z):
     return 1 / (1 + np.exp(-z))
 
@@ -17,9 +16,10 @@ class GD_Model:
     # data matrix goes from m x n to m x 2n
 
     def add_feature_fn(self, fn):
-        feature_data = fn(self.data)
+        feature_data = fn(self.data + 1e-20)
         if feature_data.shape[0]==self.data.shape[0]:
             self.data = np.concatenate((self.data,feature_data), axis=1)
+            self.w = np.ones((self.data.shape[1],1)) # reset weights
         else:
             raise ValueError(f"shapes where mismatched. New features have {feature_data.shape[0]} rows, original data has {self.data.shape[0]} rows")
     
@@ -64,25 +64,28 @@ class GD_Model:
         print(f"Training final loss: {loss}, Training final accuracy: {self.accuracy()}")
 
 # For a given datapoint get the sum of each color
-def get_sum_colors(data):
+def get_sum_colors(datapt):
+    colors = [0]*5
+    for i in range(len(colors)):
+        colors[i] = np.sum(datapt == i)
+    return np.array(colors)
+
+def get_color_data(data):
+    m,n = data.shape
     all = []
-    for i in range(data.shape[0]):
-        last_color = int(np.max(data[i])+1)
-        colors = [0]*last_color
-        for j in range(last_color):
-            colors[j] = np.sum(data[i] == i)
-        all.append(np.array(colors))
+    for i in range(m):
+        all.append(get_sum_colors(data[i]))
     return np.array(all)
+
 
 if __name__ == '__main__':
     data = np.load('5k_data/data.npy')
     labels = np.load('5k_data/labels.npy')
-    cols = get_sum_colors(data)
-    new_data = add_neighborhood_feature(data, window_size=5)
-
-    regression = GD_Model(new_data, np.ones((new_data.shape[1],1)), labels[:,0])
+    data = add_neighborhood_feature(data, window_size=5)
+    regression = GD_Model(data, np.ones((data.shape[1],1)), labels[:,0])
+    regression.add_feature_fn(np.cos)
     print(f'Current loss: {regression.LCE(f=regression(), y=regression.labels)}, Current accuracy: {regression.accuracy()}')
-    regression.train(10000, batch = 500)
+    regression.train(10000, batch = 35)
     ww = regression.w
 
     test_data = np.load('Task1_Testset500/data.npy')
@@ -91,6 +94,7 @@ if __name__ == '__main__':
     regression.w = np.ones_like(regression.w)
     regression.data = test_data
     regression.labels = test_labels
+    regression.add_feature_fn(np.cos)
     print(f'Initial Testing loss: {regression.LCE(f=regression(), y=regression.labels)}, Initial Testing accuracy: {regression.accuracy()}')
     regression.w = ww
     print(f'Final Testing loss: {regression.LCE(f=regression(), y=regression.labels)}, Final Testing accuracy: {regression.accuracy()}')
