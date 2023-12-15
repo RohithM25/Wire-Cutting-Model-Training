@@ -84,14 +84,14 @@ def add_neighborhood_feature(data, window_size=3):
     return np.array(new_data)
 
 if __name__ == '__main__':
-    training_data = np.load('1k_data/data.npy')
-    training_labels = np.load('1k_data/labels.npy')
+    training_data = np.load('5k_data/data.npy')
+    training_labels = np.load('5k_data/labels.npy')
     testing_data = np.load('Task1_Testset500/data.npy')
     testing_labels = np.load('Task1_Testset500/labels.npy')
 
     data = add_neighborhood_feature(training_data)
     data = add_polynomial_features(data, degree=4)
-    weights = feed_forward(data, training_labels, num_iters=10000000)
+    weights = feed_forward(data, training_labels, num_iters=150000)
 
     tdata = add_neighborhood_feature(testing_data)
     tdata = add_polynomial_features(tdata, degree=4)

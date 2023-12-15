@@ -3,7 +3,6 @@ from regression import add_neighborhood_feature, add_polynomial_features
 
 # We can think of data as m x n matrix. m -> number of data points/samples, n -> number of features per datapoint
 # We can multiply m x n matrix with weights vector n x 1, then apply sigmoid to all of these to get m results
-
 def sigmoid(z):
     return 1 / (1 + np.exp(-z))
 
@@ -17,11 +16,12 @@ class GD_Model:
     # data matrix goes from m x n to m x 2n
 
     def add_feature_fn(self, fn):
-        feature_data = fn(self.data)
+        feature_data = fn(self.data + 1e-20)
         if feature_data.shape[0]==self.data.shape[0]:
             self.data = np.concatenate((self.data,feature_data), axis=1)
         else:
             raise ValueError(f"shapes where mismatched. New features have {feature_data.shape[0]} rows, original data has {self.data.shape[0]} rows")
+        self.w = np.ones((self.data.shape[1],1)) # reset weights
     
     def __call__(self, d = np.array([])):
         if not d.any():
@@ -77,12 +77,11 @@ def get_sum_colors(data):
 if __name__ == '__main__':
     data = np.load('5k_data/data.npy')
     labels = np.load('5k_data/labels.npy')
-    cols = get_sum_colors(data)
-    new_data = add_neighborhood_feature(data, window_size=5)
-
-    regression = GD_Model(new_data, np.ones((new_data.shape[1],1)), labels[:,0])
+    data = add_neighborhood_feature(data, window_size=5)
+    regression = GD_Model(data, np.ones((data.shape[1],1)), labels[:,0])
+    # regression.add_feature_fn(np.log)
     print(f'Current loss: {regression.LCE(f=regression(), y=regression.labels)}, Current accuracy: {regression.accuracy()}')
-    regression.train(10000, batch = 500)
+    regression.train(8000, batch = 400)
     ww = regression.w
 
     test_data = np.load('Task1_Testset500/data.npy')
@@ -91,11 +90,11 @@ if __name__ == '__main__':
     regression.w = np.ones_like(regression.w)
     regression.data = test_data
     regression.labels = test_labels
+    # regression.add_feature_fn(np.log)
     print(f'Initial Testing loss: {regression.LCE(f=regression(), y=regression.labels)}, Initial Testing accuracy: {regression.accuracy()}')
     regression.w = ww
     print(f'Final Testing loss: {regression.LCE(f=regression(), y=regression.labels)}, Final Testing accuracy: {regression.accuracy()}')
-    # test_regr = GD_Model(test_data, regression.w, test_labels)
-    # print(f'Testing loss: {test_regr.LCE(f=test_regr(), y=test_regr.labels)}, Current accuracy: {test_regr.accuracy()}')
+
 
 
 
