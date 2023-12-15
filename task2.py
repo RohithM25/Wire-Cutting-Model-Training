@@ -1,6 +1,6 @@
 import numpy as np
 from regression import add_polynomial_features
-
+import matplotlib.pyplot as plt
 
 def softmax(matrix):
     exp_matrix = np.exp(matrix - np.max(matrix, axis=1, keepdims=True))
@@ -34,6 +34,7 @@ class Task2_Model:
         return acc
     
     def train(self, iters, lr = 0.05, batch=None, reset_weights = True, reg_lambda = 0.01):
+        loss_coords, accuracy_coords = [], []
         if not batch:
             batch = self.data.shape[0]
         if reset_weights:
@@ -46,9 +47,13 @@ class Task2_Model:
             loss = self.cross_entropy_loss(pred, labels)
             # Add L2 regularization penalty
             loss += reg_lambda * 0.5 * np.sum(self.w ** 2)
+            if i % 100 == 0:
+                loss_coords.append(loss)
+                accuracy_coords.append(model.accuracy(model(), model.labels))
             grad = np.dot(data.T, pred-labels)/batch + reg_lambda * self.w
             self.w -= lr*grad
         print(f"Training final loss: {loss}, Training final accuracy {model.accuracy(model(), model.labels)}")
+        return (loss_coords, accuracy_coords)
 
         
         
@@ -78,9 +83,30 @@ if __name__ == '__main__':
 
     model = Task2_Model(data=tdata, weights=np.zeros((n, o)), labels=tlabels)
     print("init loss", model.cross_entropy_loss(model(), model.labels), "init acc", model.accuracy(model(), model.labels))
-    model.train(5000, batch=300)
+    loss_coords, accuracy_coords = model.train(5000, batch=300)
+
+    x_vals = list(range(0, 50))
 
 
-    
-    
+    # Creating subplots with 1 row and 2 columns
+    fig, axs = plt.subplots(1, 2, figsize=(12, 4))
 
+    # Plotting the loss in the first subplot
+    axs[0].plot(x_vals, loss_coords, label='Loss', marker='o')
+    axs[0].set_xlabel('Iterations')
+    axs[0].set_ylabel('Loss')
+    axs[0].set_title('Loss over Iterations')
+    axs[0].legend()
+
+    # Plotting the accuracy in the second subplot
+    axs[1].plot(x_vals, accuracy_coords, label='Accuracy', marker='s')
+    axs[1].set_xlabel('Iterations')
+    axs[1].set_ylabel('Accuracy')
+    axs[1].set_title('Accuracy over Iterations')
+    axs[1].legend()
+
+    # Adjust layout for better spacing
+    plt.tight_layout()
+
+    # Display the subplots
+    plt.show()
