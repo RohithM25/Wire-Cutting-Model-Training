@@ -48,5 +48,5 @@ if __name__=='__main__':
     parser.add_argument('--dest', help='folder where we will store all the data')
     args = parser.parse_args()
 
-    makeTask2Sets(args.N, args.dest)
+    makeTask1Sets(args.N, args.dest)
 

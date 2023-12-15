@@ -9,7 +9,7 @@ warnings.filterwarnings("ignore", category=NumbaWarning)
 
 np.random.seed(42)
 
-@jit(nopython=False)
+# @jit(nopython=False)
 def SGD(w, x, y, alpha):
     # compute estimated output y'
     y_prime = sigmoid(float(np.dot(x,w)))
@@ -19,16 +19,16 @@ def SGD(w, x, y, alpha):
     w -= alpha * (y_prime - y) * x
     return cur_loss
 
-@jit(nopython=False)
+# @jit(nopython=False)
 def sigmoid(z):
     return (1 / (1 + np.exp(-z)))
 
-@jit(nopython=False)
+# @jit(nopython=False)
 def avg_loss(data, w, labels):
     losses = [loss(sigmoid(np.dot(x, w)), y) for x, y in zip(data, labels[:, 0])]
     return np.average(losses)
 
-@jit(nopython=False)
+# @jit(nopython=False)
 def loss(actual_y, y_prime):
     epsilon = 1e-15
     return -actual_y * np.log(y_prime+epsilon) - (1-actual_y) * np.log(1-y_prime+epsilon)
@@ -40,16 +40,15 @@ def add_polynomial_features(X, degree):
         features.append(X**d)
     return np.concatenate(features, axis=1)
 
-@jit(nopython=False)
+# @jit(nopython=False)
 def accuracy(data, labels, weights):
-    print(data.shape)
     outs = sigmoid(np.dot(data, weights))
     binary = np.int64((outs >= 0.5))
     samples = data.shape[0]
     correct = np.sum(np.equal(binary,labels[:,0]))
     return correct/samples
 
-@jit(nopython=False)
+# @jit(nopython=False)
 def feed_forward(data,labels, num_iters = 10000):
     # Adding in a bias term
     bias = np.ones((data.shape[0], 1))
@@ -63,7 +62,7 @@ def feed_forward(data,labels, num_iters = 10000):
         y = labels[index][0]
         loss = SGD(w, x, y, alpha=0.01)
         
-    print(f'Average Loss: {avg_loss(data,w,labels)}, Accuracy on testing set: {accuracy(data, labels, w)}')
+    print(f'Average Loss: {avg_loss(data,w,labels)}, Accuracy on training data: {accuracy(data, labels, w)}')
     return w
 
 def compute_neighborhood_mean2(image, window_size):
@@ -92,7 +91,7 @@ if __name__ == '__main__':
 
     data = add_neighborhood_feature(training_data)
     data = add_polynomial_features(data, degree=4)
-    weights = feed_forward(data, training_labels, num_iters=1100000)
+    weights = feed_forward(data, training_labels, num_iters=10000000)
 
     tdata = add_neighborhood_feature(testing_data)
     tdata = add_polynomial_features(tdata, degree=4)
