@@ -48,7 +48,7 @@ class GD_Model:
         if not batch:
             batch = self.data.shape[0]
         if reset_weights:
-            self.w = np.ones((self.data.shape[1],self.labels.shape[1]))
+            self.w = np.ones((self.data.shape[1],1))
         for i in range(iters):
             ri = np.random.permutation(len(self.data))
             data = self.data[ri][:batch]
